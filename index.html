@@ -1140,6 +1140,20 @@ body.present-mode .present-exit-btn { display: flex; }
 .print-card-cats { font-size: 7pt; color: #888; margin-top: 2mm; }
 .print-card.empty { border-style: none; }
 
+/* Färgkodad utskriftsstil — tunn färgad topplist + kant istället för grå streckad linje */
+.print-card.print-card-color {
+  border: 1.5pt solid var(--pc-stripe, #306BF0);
+  border-top: 2.5mm solid var(--pc-stripe, #306BF0);
+  position: relative;
+}
+.print-card-num {
+  position: absolute; top: 3.5mm; right: 2.5mm;
+  font-size: 7pt; font-weight: 700; color: #999;
+  background: #f2f2f2; border-radius: 50%;
+  width: 5mm; height: 5mm; display: flex; align-items: center; justify-content: center;
+}
+.print-card.print-card-color .print-card-num { color: var(--pc-stripe, #306BF0); background: #fff; border: 1pt solid var(--pc-stripe, #306BF0); }
+
 /* ===== SELFTEST MODE ===== */
 .selftest-wrap {
   width: 100%; margin-top: 16px;
@@ -1927,6 +1941,29 @@ body.fs-mode .app-footer { display: none; }
         <option value="2x2">4 kort (2 × 2)</option>
         <option value="3x3">9 kort (3 × 3)</option>
       </select>
+    </div>
+
+    <div class="fg">
+      <label>Utskriftsstil</label>
+      <div class="print-flip-choice">
+        <label class="print-flip-opt">
+          <input type="radio" name="pr-style" value="sparsam" checked />
+          <div>
+            <div class="pfo-title">⚪ Sparsam</div>
+            <div class="pfo-desc">Svartvit, streckad kantlinje. Besparar bläck/toner.</div>
+          </div>
+        </label>
+        <label class="print-flip-opt">
+          <input type="radio" name="pr-style" value="farg" />
+          <div>
+            <div class="pfo-title">🎨 Färgkodad</div>
+            <div class="pfo-desc">Färgad kant/topplist efter kortets första kategori — samma färger som i appen. Lätt att sortera för ögat, men drar mer bläck/toner.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="replace-row" style="margin:4px 0 10px">
+      <label><input type="checkbox" id="pr-numbering" /> Visa kortnummer i hörnet (för att sortera tillbaka i ordning)</label>
     </div>
 
     <div class="fg">
@@ -4372,6 +4409,14 @@ function doPrint(side){
   const {cols,rows} = getPrintGrid();
   const perPage = cols*rows;
   const flipMethod = document.querySelector('input[name="pr-flip"]:checked').value; // 'long' | 'short'
+  const style = document.querySelector('input[name="pr-style"]:checked').value; // 'sparsam' | 'farg'
+  const showNumber = document.getElementById('pr-numbering')?.checked;
+
+  // Stabilt kortnummer (1-baserat) — satt EN gång utifrån ursprunglig
+  // ordning, oberoende av hur baksidans rutnät sedan speglas, så att
+  // samma fysiska kort visar samma nummer på fram- och baksidan.
+  const numberOf = new Map();
+  picked.forEach((c,i)=>numberOf.set(c.id, i+1));
 
   // Dela upp i sidor (en grupp kort per fysiskt A4-ark)
   const pageChunks = [];
@@ -4400,7 +4445,7 @@ function doPrint(side){
     for(let r=0;r<rows;r++){
       for(let c=0;c<cols;c++){
         const card = ordered[r] ? ordered[r][c] : null;
-        cells.push(card ? renderPrintCard(card, side) : '<div class="print-card empty"></div>');
+        cells.push(card ? renderPrintCard(card, side, style, showNumber?numberOf.get(card.id):null) : '<div class="print-card empty"></div>');
       }
     }
     return `<div class="print-page" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${cells.join('')}</div>`;
@@ -4408,15 +4453,22 @@ function doPrint(side){
 
   setTimeout(()=>window.print(), 80);
 }
-function renderPrintCard(card, side){
+function renderPrintCard(card, side, style, number){
   const isFront = side==='front';
   const text = isFront ? card.q : card.a;
   const lbl  = isFront ? 'Fråga' : 'Svar';
   const imgData = card.imgUrl ? {src:card.imgUrl} : (card.imgId ? images[card.imgId] : null);
   const showImg = imgData && (!card.imgSide || card.imgSide==='both' || card.imgSide===side);
   const catsHtml = (showCatTags && card.cats && card.cats.length) ? `<div class="print-card-cats">${card.cats.map(esc).join(' · ')}</div>` : '';
-  return `<div class="print-card">
+  const isColored = style==='farg';
+  const stripeColor = isColored ? ((card.cats&&card.cats.length) ? catGradient(card.cats[0])[0] : '#306BF0') : null;
+  const cls   = 'print-card' + (isColored ? ' print-card-color' : '');
+  const styleAttr = stripeColor ? ` style="--pc-stripe:${stripeColor}"` : '';
+  const numberHtml = number ? `<div class="print-card-num">${number}</div>` : '';
+  return `<div class="${cls}"${styleAttr}>
+    ${numberHtml}
     <div class="print-card-lbl">${lbl}</div>
+
     ${showImg ? `<img src="${imgData.src}" alt="" />` : ''}
     <div class="print-card-txt">${esc(text)}</div>
     ${catsHtml}
