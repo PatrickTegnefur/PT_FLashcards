@@ -60,16 +60,40 @@ fram- och baksida:
   skrivares standardinställning för dubbelsidig utskrift.
 - **Upp och ner** (kortsidan) — om du vänder bunten som ett helt block.
 
-Utskriften sker i två separata steg (ingen automatisk duplex): **1) Skriv
-ut framsidor**, vänd pappersbunten på det sätt du valde ovan och lägg
-tillbaka den i skrivaren, **2) Skriv ut baksidor**. Layouten speglas
-automatiskt så att rätt svar hamnar bakom rätt fråga när du klipper isär
-korten längs de streckade linjerna.
+**Två sätt att skriva ut:**
+
+- **🖐️ Manuellt, i två omgångar** (standard) — skriv ut framsidor, vänd
+  pappersbunten på det sätt du valde, skriv ut baksidor. Fungerar alltid,
+  oavsett skrivare.
+- **🖨️ Automatiskt, en utskrift** — fram- och baksidor varvas i EN
+  utskrift. Kräver bara att du kryssar i **"Tvåsidig utskrift" /
+  "Duplex"** i skrivardialogen som öppnas (välj "Vänd längs långsidan"
+  om du tillfrågas om riktning). En webbsida kan tyvärr inte kryssa i den
+  rutan åt dig — webbläsare saknar helt enkelt stöd för det — men
+  sidorna är förberedda i rätt ordning så att det blir korrekt så fort du
+  kryssar i den. Fungerar bara om din skrivare faktiskt har dubbelsidig
+  funktion; annars använd Manuellt.
+
+Oavsett sätt speglas layouten automatiskt så att rätt svar hamnar bakom
+rätt fråga när du klipper isär korten längs de streckade linjerna.
 
 Skriv gärna ut **ett enda A4 först** och kontrollera att fram- och
 baksida verkligen stämmer överens innan du skriver ut en hel kortlek —
 vilket håll som är "rätt" beror på hur just din skrivare (eller du
 manuellt) hanterar dubbelsidig utskrift.
+
+**Utskriftsstil:** välj mellan **Sparsam** (svartvit, streckad kant —
+besparar bläck/toner) och **Färgkodad** (tunn färgad kant/topplist efter
+kortets första kategori — lättare att sortera för ögat men drar mer
+bläck/toner). Oavsett stil kan du också kryssa i **kortnummer** i hörnet,
+så att en nedtappad eller blandad hög går att sortera tillbaka i
+ursprungsordning.
+
+Väljer du Färgkodad dyker en liten **färgväljare per kategori** upp under
+"Format" — åtta förvalda PT Ljus-färger plus en egen-färg-knapp (full
+färgväljare) om du vill ha exakt den nyans du är ute efter. Standard är
+samma automatiska färg som används i appen, men du kan skriva över den
+för valfri kategori.
 
 ## Avstängda lägen
 

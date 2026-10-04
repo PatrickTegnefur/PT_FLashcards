@@ -52,7 +52,19 @@ body {
   color: var(--text);
   min-height: 100vh;
   transition: background 0.3s, color 0.3s;
+  position: relative;
 }
+
+/* Ambient-bakgrund — tre suddiga, färgade cirklar i signaturgradientens
+   kulörer, fast positionerade bakom allt innehåll. Samma mönster som
+   "PT Verktyg"-launcherns glasmorphism-kort (brand.md 12.2) — ger
+   bakgrunden färg att bryta mot istället för en platt yta. */
+.ambient-bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+.ambient-blob { position: fixed; border-radius: 50%; filter: blur(70px); opacity: 0.35; }
+.ambient-1 { width: 420px; height: 420px; background: #66C7C2; top: -120px;  left: -100px; }
+.ambient-2 { width: 460px; height: 460px; background: #F4A261; bottom: -140px; right: -120px; }
+.ambient-3 { width: 380px; height: 380px; background: #EC6095; top: 45%; left: 55%; }
+body.present-mode .ambient-bg, body.fs-mode .ambient-bg { display: none; }
 
 /* ===== HEADER — PT Ljus navbar: alltid signaturgradienten, vit text/ikoner ===== */
 header {
@@ -395,6 +407,43 @@ main { max-width: 740px; margin: 0 auto; padding: 26px 16px 70px; }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 }
+/* Panel-varianter med fast header/footer och scrollbart mittenfält —
+   för paneler med listor som annars trycker ner knappar/inställningar
+   utom synhåll (t.ex. utskrift, elevexport). */
+.panel.panel-flex {
+  display: flex; flex-direction: column;
+  padding: 0; min-height: 0;
+}
+.panel.panel-flex > .phdr { padding: 20px 20px 14px; margin-bottom: 0; flex-shrink: 0; }
+.panel-scroll { flex: 1 1 auto; min-height: 80px; overflow-y: auto; padding: 4px 20px 16px; }
+.panel-sticky-footer {
+  flex-shrink: 0; border-top: 1.5px solid var(--border);
+  background: var(--surface); padding: 12px 20px calc(12px + env(safe-area-inset-bottom,0px));
+  display: flex; flex-direction: column; gap: 9px;
+}
+.panel-sticky-footer .psf-count { font-size: 0.78rem; color: var(--muted); }
+.panel-sticky-footer .psf-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Stegflikar (steg 1/2 osv) — visuellt skilda från itabs (samlingar/kategorier)
+   men samma grundstil, fast lite större/tydligare som sidhuvud-navigering. */
+.pr-steps { display: flex; gap: 6px; margin-bottom: 14px; }
+.pr-step {
+  flex: 1; padding: 9px 10px; border-radius: 9px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  font-family: inherit; font-size: 0.8rem; font-weight: 600;
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.pr-step.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+.pr-step-num {
+  width: 18px; height: 18px; border-radius: 50%; background: var(--border);
+  color: var(--surface); font-size: 0.68rem; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.pr-step.active .pr-step-num { background: var(--accent); }
+.pr-step-panel { display: none; }
+.pr-step-panel.active { display: block; }
+
 .phdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .phdr h2 { font-family: 'Montserrat', sans-serif; font-size: 1.18rem; font-weight: 700; }
 .xbtn {
@@ -1106,6 +1155,30 @@ body.present-mode .present-exit-btn { display: flex; }
 .pfo-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 2px; }
 .pfo-desc  { font-size: 0.76rem; color: var(--muted); line-height: 1.4; }
 
+/* Kategori-färgväljare för utskrift */
+.pcp-row {
+  padding: 8px 10px; border-radius: 9px; background: var(--surface2);
+  margin-bottom: 6px;
+}
+.pcp-label {
+  font-size: 0.8rem; font-weight: 600; color: var(--text);
+  margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pcp-swatchrow { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.pcp-swatches { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; min-width: 0; }
+.pcp-swatch {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; padding: 0; flex-shrink: 0;
+}
+.pcp-swatch.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--surface2); }
+.pcp-custom-lbl {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px dashed var(--muted); flex-shrink: 0; margin-left: auto;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: var(--muted); background: var(--surface);
+}
+.pcp-custom-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
 /* ===== PRINT OUTPUT (A4-ark) ===== */
 #print-area { display: none; }
 @media print {
@@ -1450,6 +1523,12 @@ body.fs-mode .app-footer { display: none; }
   </style>
 </head>
 <body>
+
+<div class="ambient-bg" aria-hidden="true">
+  <div class="ambient-blob ambient-1"></div>
+  <div class="ambient-blob ambient-2"></div>
+  <div class="ambient-blob ambient-3"></div>
+</div>
 
 <button class="fs-exit-btn"      onclick="toggleFullscreen()"  title="Avsluta fullskärm">✕</button>
 <button class="present-exit-btn" onclick="togglePresentMode()" title="Avsluta presentationsläge">✕</button>
@@ -1889,113 +1968,178 @@ body.fs-mode .app-footer { display: none; }
 
 <!-- STUDENT EXPORT -->
 <div class="overlay admin-only" id="studentexport-ov">
-  <div class="panel" style="max-width:480px">
+  <div class="panel panel-flex" style="max-width:480px">
     <div class="phdr">
       <h2>🎓 Exportera elevversion</h2>
       <button class="xbtn" onclick="closePanel('studentexport-ov')">✕</button>
     </div>
-    <div class="ihint">Välj samlingar och/eller kategorier eleverna ska få (du kan blanda båda). Resultatet blir en fristående .html-fil med bara det urvalet — inga andra ämnesområden, ingen redigering, inga sparade framsteg från dig. Precis som korsordsexporten.</div>
-    <div class="fg">
-      <label>Titel (visas i sidhuvudet hos eleven)</label>
-      <input id="se-title" type="text" placeholder="t.ex. Geometri — begreppsträning åk 8" style="width:100%" />
+
+    <div class="panel-scroll">
+      <div class="ihint">Välj samlingar och/eller kategorier eleverna ska få (du kan blanda båda). Resultatet blir en fristående .html-fil med bara det urvalet — inga andra ämnesområden, ingen redigering, inga sparade framsteg från dig. Precis som korsordsexporten.</div>
+      <div class="fg">
+        <label>Titel (visas i sidhuvudet hos eleven)</label>
+        <input id="se-title" type="text" placeholder="t.ex. Geometri — begreppsträning åk 8" style="width:100%" />
+      </div>
+      <div class="itabs">
+        <button class="itab active" id="se-tab-colls" onclick="switchSeTab('colls')">📚 Samlingar</button>
+        <button class="itab" id="se-tab-cats" onclick="switchSeTab('cats')">🏷️ Kategorier</button>
+      </div>
+      <div class="mix-coll-list" id="se-coll-list"></div>
+      <div class="mix-coll-list" id="se-cat-list" style="display:none"></div>
+      <div class="replace-row" style="margin:10px 0">
+        <label><input type="checkbox" id="se-include-uncategorized" /> Inkludera kort utan samling</label>
+      </div>
     </div>
-    <div class="itabs">
-      <button class="itab active" id="se-tab-colls" onclick="switchSeTab('colls')">📚 Samlingar</button>
-      <button class="itab" id="se-tab-cats" onclick="switchSeTab('cats')">🏷️ Kategorier</button>
-    </div>
-    <div class="mix-coll-list" id="se-coll-list"></div>
-    <div class="mix-coll-list" id="se-cat-list" style="display:none"></div>
-    <div class="replace-row" style="margin:10px 0">
-      <label><input type="checkbox" id="se-include-uncategorized" /> Inkludera kort utan samling</label>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn-pri" id="se-export-btn" onclick="exportStudentVersion()" disabled>Exportera .html</button>
-      <button class="btn-sec" onclick="closePanel('studentexport-ov')">Avbryt</button>
+
+    <!-- Fast footer: alltid synlig, oavsett hur lång listan ovanför är -->
+    <div class="panel-sticky-footer">
+      <div class="psf-count" id="se-count">Inga kort valda än.</div>
+      <div class="psf-btns">
+        <button class="btn-pri" id="se-export-btn" onclick="exportStudentVersion()" disabled>Exportera .html</button>
+        <button class="btn-sec" onclick="closePanel('studentexport-ov')">Avbryt</button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- PRINT -->
 <div class="overlay admin-only" id="print-ov">
-  <div class="panel" style="max-width:480px">
+  <div class="panel panel-flex" style="max-width:480px">
     <div class="phdr">
       <h2>🖨️ Skriv ut kortlek</h2>
       <button class="xbtn" onclick="closePanel('print-ov')">✕</button>
     </div>
-    <div class="ihint">Välj samlingar och/eller kategorier, skriv ut framsidorna, vänd pappersbunten enligt anvisningen, och skriv sedan ut baksidorna — så hamnar rätt svar bakom rätt fråga på det fysiska kortet.</div>
-    <div class="itabs">
-      <button class="itab active" id="pr-tab-colls" onclick="switchPrTab('colls')">📚 Samlingar</button>
-      <button class="itab" id="pr-tab-cats" onclick="switchPrTab('cats')">🏷️ Kategorier</button>
-    </div>
-    <div class="mix-coll-list" id="pr-coll-list"></div>
-    <div class="mix-coll-list" id="pr-cat-list" style="display:none"></div>
-    <div class="replace-row" style="margin:10px 0">
-      <label><input type="checkbox" id="pr-include-uncategorized" /> Inkludera kort utan samling</label>
-    </div>
 
-    <div class="fg">
-      <label>Kort per A4</label>
-      <select id="pr-grid" style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:8px 11px;font-family:inherit;font-size:0.86rem;background:var(--surface2);color:var(--text)">
-        <option value="2x4" selected>8 kort (2 × 4)</option>
-        <option value="2x3">6 kort (2 × 3)</option>
-        <option value="2x2">4 kort (2 × 2)</option>
-        <option value="3x3">9 kort (3 × 3)</option>
-      </select>
-    </div>
+    <div class="panel-scroll">
+      <div class="ihint">Skriv ut framsidorna, vänd pappersbunten enligt anvisningen, och skriv sedan ut baksidorna — så hamnar rätt svar bakom rätt fråga på det fysiska kortet.</div>
 
-    <div class="fg">
-      <label>Utskriftsstil</label>
-      <div class="print-flip-choice">
-        <label class="print-flip-opt">
-          <input type="radio" name="pr-style" value="sparsam" checked />
-          <div>
-            <div class="pfo-title">⚪ Sparsam</div>
-            <div class="pfo-desc">Svartvit, streckad kantlinje. Besparar bläck/toner.</div>
+      <div class="pr-steps">
+        <button class="pr-step active" id="pr-pstep-content" onclick="switchPrPanelStep('content')">
+          <span class="pr-step-num">1</span> Innehåll
+        </button>
+        <button class="pr-step" id="pr-pstep-format" onclick="switchPrPanelStep('format')">
+          <span class="pr-step-num">2</span> Format
+        </button>
+      </div>
+
+      <!-- STEG 1: Innehåll -->
+      <div class="pr-step-panel active" id="pr-stepbody-content">
+        <div class="itabs">
+          <button class="itab active" id="pr-tab-colls" onclick="switchPrTab('colls')">📚 Samlingar</button>
+          <button class="itab" id="pr-tab-cats" onclick="switchPrTab('cats')">🏷️ Kategorier</button>
+        </div>
+        <div class="mix-coll-list" id="pr-coll-list"></div>
+        <div class="mix-coll-list" id="pr-cat-list" style="display:none"></div>
+        <div class="replace-row" style="margin:10px 0">
+          <label><input type="checkbox" id="pr-include-uncategorized" /> Inkludera kort utan samling</label>
+        </div>
+      </div>
+
+      <!-- STEG 2: Format -->
+      <div class="pr-step-panel" id="pr-stepbody-format">
+        <div class="fg">
+          <label>Kort per A4</label>
+          <select id="pr-grid" style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:8px 11px;font-family:inherit;font-size:0.86rem;background:var(--surface2);color:var(--text)">
+            <option value="2x4" selected>8 kort (2 × 4)</option>
+            <option value="2x3">6 kort (2 × 3)</option>
+            <option value="2x2">4 kort (2 × 2)</option>
+            <option value="3x3">9 kort (3 × 3)</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <label>Utskriftsstil</label>
+          <div class="print-flip-choice">
+            <label class="print-flip-opt">
+              <input type="radio" name="pr-style" value="sparsam" checked />
+              <div>
+                <div class="pfo-title">⚪ Sparsam</div>
+                <div class="pfo-desc">Svartvit, streckad kantlinje. Besparar bläck/toner.</div>
+              </div>
+            </label>
+            <label class="print-flip-opt">
+              <input type="radio" name="pr-style" value="farg" />
+              <div>
+                <div class="pfo-title">🎨 Färgkodad</div>
+                <div class="pfo-desc">Färgad kant/topplist — du väljer färgen per kategori nedan. Lätt att sortera för ögat, men drar mer bläck/toner.</div>
+              </div>
+            </label>
           </div>
-        </label>
-        <label class="print-flip-opt">
-          <input type="radio" name="pr-style" value="farg" />
-          <div>
-            <div class="pfo-title">🎨 Färgkodad</div>
-            <div class="pfo-desc">Färgad kant/topplist efter kortets första kategori — samma färger som i appen. Lätt att sortera för ögat, men drar mer bläck/toner.</div>
+        </div>
+
+        <div class="fg" id="pr-colorpicker-wrap" style="display:none">
+          <label>Färg per kategori</label>
+          <div id="pr-colorpicker-list"></div>
+        </div>
+
+        <div class="replace-row" style="margin:4px 0 10px">
+          <label><input type="checkbox" id="pr-numbering" /> Visa kortnummer i hörnet (för att sortera tillbaka i ordning)</label>
+        </div>
+
+        <div class="fg">
+          <label>Hur vill du skriva ut?</label>
+          <div class="print-flip-choice">
+            <label class="print-flip-opt">
+              <input type="radio" name="pr-mode" value="manual" checked onchange="updatePrintModeUI()" />
+              <div>
+                <div class="pfo-title">🖐️ Manuellt, i två omgångar</div>
+                <div class="pfo-desc">Skriv ut framsidor, vänd pappersbunten själv, skriv ut baksidor. Fungerar alltid, oavsett skrivare.</div>
+              </div>
+            </label>
+            <label class="print-flip-opt">
+              <input type="radio" name="pr-mode" value="auto" onchange="updatePrintModeUI()" />
+              <div>
+                <div class="pfo-title">🖨️ Automatiskt, en utskrift</div>
+                <div class="pfo-desc">Kräver att din skrivare klarar dubbelsidig utskrift — du kryssar i det i skrivardialogen som öppnas.</div>
+              </div>
+            </label>
           </div>
-        </label>
+        </div>
+
+        <div class="fg" id="pr-flip-wrap">
+          <label>Hur vänder du pappersbunten mellan fram- och baksida?</label>
+          <div class="print-flip-choice">
+            <label class="print-flip-opt">
+              <input type="radio" name="pr-flip" value="long" checked />
+              <div>
+                <div class="pfo-title">↔️ I sidled (som en boksida)</div>
+                <div class="pfo-desc">Vänd bunten vänster–höger. Matchar de flesta skrivares standardinställning för dubbelsidigt.</div>
+              </div>
+            </label>
+            <label class="print-flip-opt">
+              <input type="radio" name="pr-flip" value="short" />
+              <div>
+                <div class="pfo-title">↕️ Upp och ner (kortsidan)</div>
+                <div class="pfo-desc">Vänd bunten som ett block, topp blir botten.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="fg" id="pr-auto-hint" style="display:none">
+          <div style="background:var(--accent-bg);border-radius:9px;padding:10px 12px;font-size:0.76rem;color:var(--text2);line-height:1.6">
+            🖨️ När skrivardialogen öppnas: kryssa i <strong>"Tvåsidig utskrift" / "Dubbelsidig" / "Duplex"</strong>, och välj <strong>"Vänd längs långsidan"</strong> om du tillfrågas. Har din skrivare ingen dubbelsidig funktion fungerar inte det här läget — använd Manuellt istället.
+          </div>
+        </div>
+
+        <div style="background:var(--surface2);border-radius:9px;padding:10px 12px;font-size:0.76rem;color:var(--text2);line-height:1.5">
+          💡 Skriv gärna ut <strong>ett enda A4</strong> först och kontrollera att fram- och baksida hamnar rätt, innan du skriver ut hela kortleken.
+        </div>
       </div>
     </div>
-    <div class="replace-row" style="margin:4px 0 10px">
-      <label><input type="checkbox" id="pr-numbering" /> Visa kortnummer i hörnet (för att sortera tillbaka i ordning)</label>
-    </div>
 
-    <div class="fg">
-      <label>Hur vänder du pappersbunten mellan fram- och baksida?</label>
-      <div class="print-flip-choice">
-        <label class="print-flip-opt">
-          <input type="radio" name="pr-flip" value="long" checked />
-          <div>
-            <div class="pfo-title">↔️ I sidled (som en boksida)</div>
-            <div class="pfo-desc">Vänd bunten vänster–höger. Matchar de flesta skrivares standardinställning för dubbelsidigt.</div>
-          </div>
-        </label>
-        <label class="print-flip-opt">
-          <input type="radio" name="pr-flip" value="short" />
-          <div>
-            <div class="pfo-title">↕️ Upp och ner (kortsidan)</div>
-            <div class="pfo-desc">Vänd bunten som ett block, topp blir botten.</div>
-          </div>
-        </label>
+    <!-- Fast footer: alltid synlig, oavsett hur lång listan ovanför är -->
+    <div class="panel-sticky-footer">
+      <div class="psf-count" id="pr-count">Inga kort valda än.</div>
+      <div class="psf-btns" id="pr-btns-manual">
+        <button class="btn-pri" id="pr-print-front-btn" onclick="doPrint('front')" disabled>1️⃣ Skriv ut framsidor</button>
+        <button class="btn-pri" id="pr-print-back-btn" onclick="doPrint('back')" disabled>2️⃣ Skriv ut baksidor</button>
+        <button class="btn-sec" onclick="closePanel('print-ov')">Stäng</button>
       </div>
-    </div>
-
-    <div id="pr-count" style="font-size:0.78rem;color:var(--muted);margin:8px 0 4px"></div>
-
-    <div style="background:var(--surface2);border-radius:9px;padding:10px 12px;font-size:0.76rem;color:var(--text2);line-height:1.5;margin-bottom:6px">
-      💡 Skriv gärna ut <strong>ett enda A4</strong> först och kontrollera att fram- och baksida hamnar rätt, innan du skriver ut hela kortleken.
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
-      <button class="btn-pri" id="pr-print-front-btn" onclick="doPrint('front')" disabled>1️⃣ Skriv ut framsidor</button>
-      <button class="btn-pri" id="pr-print-back-btn" onclick="doPrint('back')" disabled>2️⃣ Skriv ut baksidor</button>
-      <button class="btn-sec" onclick="closePanel('print-ov')">Stäng</button>
+      <div class="psf-btns" id="pr-btns-auto" style="display:none">
+        <button class="btn-pri" id="pr-print-auto-btn" onclick="doPrintCombined()" disabled>🖨️ Skriv ut (dubbelsidigt)</button>
+        <button class="btn-sec" onclick="closePanel('print-ov')">Stäng</button>
+      </div>
     </div>
   </div>
 </div>
@@ -4190,7 +4334,9 @@ function renderStudentExportPanel(){
     }).join('');
   }
 
-  document.getElementById('se-export-btn').disabled = (seSelectedColls.size === 0 && seSelectedCats.size === 0);
+  const n = getStudentExportPickedCards().length;
+  document.getElementById('se-count').textContent = n ? `${n} kort matchar urvalet` : 'Inga kort valda än.';
+  document.getElementById('se-export-btn').disabled = (n === 0);
 }
 function toggleSeColl(id){
   if(seSelectedColls.has(id)) seSelectedColls.delete(id);
@@ -4203,20 +4349,23 @@ function toggleSeCat(cat){
   renderStudentExportPanel();
 }
 
-async function exportStudentVersion(){
+function getStudentExportPickedCards(){
   const inclUncat = document.getElementById('se-include-uncategorized')?.checked;
-  const title = (document.getElementById('se-title').value||'').trim() || 'Mina Minneskort';
-  const btn = document.getElementById('se-export-btn');
-  const btnLabel = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Exporterar…';
-
   // Facit och kategorival slås ihop (union) — ett kort tas med om det matchar NÅGOT av dem
-  const pickedCards = cards.filter(c=>{
+  return cards.filter(c=>{
     if(c.collId && seSelectedColls.has(c.collId)) return true;
     if((c.cats||[]).some(cat=>seSelectedCats.has(cat))) return true;
     if(inclUncat && !c.collId) return true;
     return false;
   });
+}
+async function exportStudentVersion(){
+  const title = (document.getElementById('se-title').value||'').trim() || 'Mina Minneskort';
+  const btn = document.getElementById('se-export-btn');
+  const btnLabel = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Exporterar…';
+
+  const pickedCards = getStudentExportPickedCards();
   if(!pickedCards.length){ alert('Inga kort matchar det valda urvalet.'); btn.disabled=false; btn.textContent=btnLabel; return; }
 
   // Samlingar tas med om de antingen kryssades i explicit, ELLER behövs för
@@ -4308,12 +4457,24 @@ async function exportStudentVersion(){
 // bakom rätt fråga när man klipper isär korten.
 let prSelectedColls = new Set();
 let prSelectedCats  = new Set();
+let prCustomCatColors = {}; // kategori-namn → vald hexfärg (skriv ut, "Färgkodad")
+const PR_SWATCH_PALETTE = ['#306BF0','#EC6095','#66C7C2','#F4A261','#18a348','#6c47d4','#e02020','#0e8a8a'];
 
 function openPrintPanel(){
   prSelectedColls = new Set();
   prSelectedCats  = new Set();
+  prCustomCatColors = {};
   switchPrTab('colls');
+  switchPrPanelStep('content');
+  document.querySelector('input[name="pr-mode"][value="manual"]').checked = true;
+  updatePrintModeUI();
   openPanel('print-ov');
+}
+function switchPrPanelStep(step){
+  document.getElementById('pr-pstep-content').classList.toggle('active', step==='content');
+  document.getElementById('pr-pstep-format').classList.toggle('active', step==='format');
+  document.getElementById('pr-stepbody-content').classList.toggle('active', step==='content');
+  document.getElementById('pr-stepbody-format').classList.toggle('active', step==='format');
 }
 function switchPrTab(tab){
   document.getElementById('pr-tab-colls').classList.toggle('active', tab==='colls');
@@ -4361,6 +4522,40 @@ function renderPrintPanel(){
     }).join('');
   }
   updatePrintCount();
+  renderPrintColorPicker();
+}
+function renderPrintColorPicker(){
+  const wrap = document.getElementById('pr-colorpicker-wrap');
+  const list = document.getElementById('pr-colorpicker-list');
+  if(!wrap || !list) return;
+  const styleEl = document.querySelector('input[name="pr-style"]:checked');
+  const isColored = styleEl && styleEl.value==='farg';
+  wrap.style.display = isColored ? '' : 'none';
+  if(!isColored) return;
+
+  const picked = getPrintPickedCards();
+  const cats = [...new Set(picked.map(c=>(c.cats&&c.cats[0])||'(ingen kategori)'))].sort((a,b)=>a.localeCompare(b,'sv'));
+  if(!cats.length){ list.innerHTML = '<p style="color:var(--muted);font-size:0.8rem">Välj kort i steg 1 först.</p>'; return; }
+
+  list.innerHTML = cats.map(cat=>{
+    const current = prCustomCatColors[cat] || (cat!=='(ingen kategori)' ? catGradient(cat)[0] : '#306BF0');
+    const swatches = PR_SWATCH_PALETTE.map(hex=>
+      `<button class="pcp-swatch${hex.toLowerCase()===current.toLowerCase()?' active':''}" style="background:${hex}" onclick="setPrintCatColor('${esc(cat)}','${hex}')" title="${hex}"></button>`
+    ).join('');
+    const inputId = 'pcp-input-' + cat.replace(/[^a-zA-Z0-9]/g,'_');
+    return `<div class="pcp-row">
+      <div class="pcp-label">${esc(cat)}</div>
+      <div class="pcp-swatchrow">
+        <div class="pcp-swatches">${swatches}</div>
+        <label class="pcp-custom-lbl" for="${inputId}" title="Egen färg">+</label>
+        <input type="color" id="${inputId}" class="pcp-custom-input" value="${current}" onchange="setPrintCatColor('${esc(cat)}',this.value)" />
+      </div>
+    </div>`;
+  }).join('');
+}
+function setPrintCatColor(cat, hex){
+  prCustomCatColors[cat] = hex;
+  renderPrintColorPicker();
 }
 function togglePrColl(id){
   if(prSelectedColls.has(id)) prSelectedColls.delete(id);
@@ -4390,40 +4585,43 @@ function updatePrintCount(){
   const {cols,rows} = getPrintGrid();
   const perPage = cols*rows;
   const pages = n ? Math.ceil(n/perPage) : 0;
+  const isAuto = document.querySelector('input[name="pr-mode"]:checked')?.value === 'auto';
   document.getElementById('pr-count').textContent = n
-    ? `${n} kort valda → ${pages} A4-ark (fram- och baksida skrivs ut separat för vardera)`
+    ? (isAuto
+        ? `${n} kort valda → ${pages} A4-ark (en utskrift, ${pages*2} sidor totalt)`
+        : `${n} kort valda → ${pages} A4-ark (fram- och baksida skrivs ut separat för vardera)`)
     : 'Inga kort valda än.';
   document.getElementById('pr-print-front-btn').disabled = n===0;
   document.getElementById('pr-print-back-btn').disabled  = n===0;
+  const autoBtn = document.getElementById('pr-print-auto-btn');
+  if(autoBtn) autoBtn.disabled = n===0;
+}
+function updatePrintModeUI(){
+  const isAuto = document.querySelector('input[name="pr-mode"]:checked').value === 'auto';
+  document.getElementById('pr-flip-wrap').style.display = isAuto ? 'none' : '';
+  document.getElementById('pr-auto-hint').style.display = isAuto ? '' : 'none';
+  document.getElementById('pr-btns-manual').style.display = isAuto ? 'none' : '';
+  document.getElementById('pr-btns-auto').style.display = isAuto ? '' : 'none';
+  updatePrintCount();
 }
 document.addEventListener('change', e=>{
   if(e.target && (e.target.id==='pr-grid' || e.target.id==='pr-include-uncategorized')) updatePrintCount();
-  if(e.target && e.target.name==='pr-flip'){
+  if(e.target && e.target.id==='se-include-uncategorized') renderStudentExportPanel();
+  if(e.target && (e.target.name==='pr-flip' || e.target.name==='pr-style' || e.target.name==='pr-mode')){
     document.querySelectorAll('.print-flip-opt').forEach(el=>el.classList.toggle('checked', el.querySelector('input').checked));
   }
+  if(e.target && e.target.name==='pr-style') renderPrintColorPicker();
 });
 
-function doPrint(side){
-  const picked = getPrintPickedCards();
-  if(!picked.length) return;
-  const {cols,rows} = getPrintGrid();
+// Bygger en array av sid-HTML (en sträng per fysiskt A4-ark) för en given
+// sida (fram/bak). Delad av både det manuella tvåstegsflödet och det
+// automatiska dubbelsidiga enstegsflödet nedan.
+function buildPrintPageHtmlList(picked, side, flipMethod, style, showNumber, numberOf, cols, rows){
   const perPage = cols*rows;
-  const flipMethod = document.querySelector('input[name="pr-flip"]:checked').value; // 'long' | 'short'
-  const style = document.querySelector('input[name="pr-style"]:checked').value; // 'sparsam' | 'farg'
-  const showNumber = document.getElementById('pr-numbering')?.checked;
-
-  // Stabilt kortnummer (1-baserat) — satt EN gång utifrån ursprunglig
-  // ordning, oberoende av hur baksidans rutnät sedan speglas, så att
-  // samma fysiska kort visar samma nummer på fram- och baksidan.
-  const numberOf = new Map();
-  picked.forEach((c,i)=>numberOf.set(c.id, i+1));
-
-  // Dela upp i sidor (en grupp kort per fysiskt A4-ark)
   const pageChunks = [];
   for(let i=0; i<picked.length; i+=perPage) pageChunks.push(picked.slice(i, i+perPage));
 
-  const area = document.getElementById('print-area');
-  area.innerHTML = pageChunks.map(chunk=>{
+  return pageChunks.map(chunk=>{
     // Bygg en cols×rows-matris i normal läsordning för denna sida
     const grid = [];
     for(let r=0;r<rows;r++){ grid.push(chunk.slice(r*cols,(r+1)*cols)); }
@@ -4449,8 +4647,42 @@ function doPrint(side){
       }
     }
     return `<div class="print-page" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${cells.join('')}</div>`;
-  }).join('');
+  });
+}
+function getPrintSettings(){
+  const picked = getPrintPickedCards();
+  const {cols,rows} = getPrintGrid();
+  const flipMethod = document.querySelector('input[name="pr-flip"]:checked').value; // 'long' | 'short'
+  const style = document.querySelector('input[name="pr-style"]:checked').value; // 'sparsam' | 'farg'
+  const showNumber = document.getElementById('pr-numbering')?.checked;
+  const numberOf = new Map();
+  picked.forEach((c,i)=>numberOf.set(c.id, i+1));
+  return {picked, cols, rows, flipMethod, style, showNumber, numberOf};
+}
 
+function doPrint(side){
+  const {picked, cols, rows, flipMethod, style, showNumber, numberOf} = getPrintSettings();
+  if(!picked.length) return;
+  const pages = buildPrintPageHtmlList(picked, side, flipMethod, style, showNumber, numberOf, cols, rows);
+  document.getElementById('print-area').innerHTML = pages.join('');
+  setTimeout(()=>window.print(), 80);
+}
+
+// Automatisk dubbelsidig utskrift i EN utskrift: fram- och baksida
+// varvas (sida1=fram ark1, sida2=bak ark1, sida3=fram ark2, …) så att
+// webbläsarens egen "Tvåsidig utskrift"-inställning (som du kryssar i
+// i skrivardialogen) placerar dem rätt på varje fysiskt ark. Antar
+// alltid vändning "i sidled" (långsidan) — det är standardkonventionen
+// för tvåsidig utskrift av stående dokument i de allra flesta
+// skrivardrivrutiner.
+function doPrintCombined(){
+  const {picked, cols, rows, style, showNumber, numberOf} = getPrintSettings();
+  if(!picked.length) return;
+  const fronts = buildPrintPageHtmlList(picked, 'front', 'long', style, showNumber, numberOf, cols, rows);
+  const backs  = buildPrintPageHtmlList(picked, 'back',  'long', style, showNumber, numberOf, cols, rows);
+  const interleaved = [];
+  for(let i=0; i<fronts.length; i++){ interleaved.push(fronts[i], backs[i]); }
+  document.getElementById('print-area').innerHTML = interleaved.join('');
   setTimeout(()=>window.print(), 80);
 }
 function renderPrintCard(card, side, style, number){
@@ -4461,7 +4693,10 @@ function renderPrintCard(card, side, style, number){
   const showImg = imgData && (!card.imgSide || card.imgSide==='both' || card.imgSide===side);
   const catsHtml = (showCatTags && card.cats && card.cats.length) ? `<div class="print-card-cats">${card.cats.map(esc).join(' · ')}</div>` : '';
   const isColored = style==='farg';
-  const stripeColor = isColored ? ((card.cats&&card.cats.length) ? catGradient(card.cats[0])[0] : '#306BF0') : null;
+  const catKey = (card.cats&&card.cats[0]) || '(ingen kategori)';
+  const stripeColor = isColored
+    ? (prCustomCatColors[catKey] || (card.cats&&card.cats.length ? catGradient(card.cats[0])[0] : '#306BF0'))
+    : null;
   const cls   = 'print-card' + (isColored ? ' print-card-color' : '');
   const styleAttr = stripeColor ? ` style="--pc-stripe:${stripeColor}"` : '';
   const numberHtml = number ? `<div class="print-card-num">${number}</div>` : '';
